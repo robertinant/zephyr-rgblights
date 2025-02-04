@@ -1,0 +1,151 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "West Build",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "linux": {
+                "command": "/usr/local/bin/west"
+            },
+            "args": [
+                "build",
+                "-p",
+                "auto",
+                "--sysbuild",
+                "-b",
+                "nicekeyboards_nicenano",
+                "--",
+                "-DBOARD_ROOT=/storage2/projects/zephyr-rgblights/"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "West sign",
+            "type": "shell",
+            "group": {
+                "kind": "util",
+                "isDefault": true
+            },
+            "linux": {
+                "command": "/usr/local/bin/west"
+            },
+            "args": [
+                "sign",
+                "-t",
+                "imgtool",
+                "--",
+                "--key",
+                "/storage2/projects/zephyr-rgblights/keys/root-rsa-2048.pem"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Setup GDB tunnel",
+            "type": "shell",
+            "group": {
+                "kind": "util",
+                "isDefault": false
+            },
+            "linux": {
+                "command": "ssh"
+            },
+            "args": [
+                "-N",
+                "-R",
+                "50000:localhost:50000",
+                "-R",
+                "50001:localhost:50001",
+                "-R",
+                "50002:localhost:50002",
+                "docker@energia.hopto.org",
+                "-p",
+                "2222"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "West Configurable Build",
+            "type": "shell",
+            "group": {
+                "kind": "build"
+            },
+            "linux": {
+                "command": "/usr/local/bin/west"
+            },
+            "args": [
+                "build",
+                "-p",
+                "${input:pristine}",
+                "-b",
+                "${input:board}"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "West Flash",
+            "type": "shell",
+            "linux": {
+                "command": "${userHome}/zephyrproject/.venv/bin/west"
+            },
+            "windows": {
+                "command": "${userHome}/zephyrproject/.venv/Scripts/west.exe"
+            },
+            "osx": {
+                "command": "${userHome}/zephyrproject/.venv/bin/west"
+            },
+            "args": [
+                "flash"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "esp32c3bin2elf",
+            "args": [
+                "build"
+            ],
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "command": "scripts/esp32c3bin2elf.sh"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "board",
+            "type": "pickString",
+            "default": "native_sim",
+            "description": "Select the board for which to compile the project",
+            "options": [
+                "native_sim",
+                "mimxrt1060_evkb",
+                "esp32c3_devkitm",
+                "nucleo_f429zi",
+                "lpcxpresso55s28"
+            ]
+        },
+        {
+            "id": "pristine",
+            "type": "pickString",
+            "description": "Choose when to run a pristine build",
+            "default": "auto",
+            "options": [
+                "auto",
+                "always",
+                "never"
+            ]
+        },
+    ]
+}
